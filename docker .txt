@@ -1,0 +1,18 @@
+--run--
+docker run --name mysql.training \
+    -p 3306:3306 \
+    -e MYSQL_ROOT_PASSWORD=pass \
+    -d mariadb:10.4
+
+--start/stop--
+docker stop mysql.training
+docker start mysql.training
+
+--rm--
+docker rm mysql.training
+
+--bash--
+docker exec -it mysql.training /bin/bash
+
+--mysql--
+mysql -uroot -ppass
