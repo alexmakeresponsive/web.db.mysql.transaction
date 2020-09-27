@@ -70,13 +70,35 @@ class Maria
         $this->setOut(['table' => ['create' => $res]]);
     }
 
-    function insertRows($nameTable, $nameColumns, $data)
+    function dropTable($name)
+    {
+        $st = "DROP TABLE $name;";
+
+        $res = $this->dbn->query($st);
+        $this->setOut(['table' => ['drop' => [$name => $res]]]);
+    }
+
+    function insertRowsOneToMany($nameTable, $nameColumns, $itemsList)
+    {
+        // find book by name
+        // if found - get id
+        // else insert book and get id
+        // for each author find him by name
+            // if found - get id
+            // else insert author and get id
+            // insert in book_authors each author id
+    }
+
+    function insertRowsOld($nameTable, $nameColumns, $itemsList)
     {
 
     // INSERT INTO table_name (column1, column2, column3, ...)
     // VALUES (value1, value2, value3, ...);
 
+        $map = [];
+
         $error = "";
+
         $st = "";
 
         $st .= "INSERT INTO $nameTable ";
@@ -89,17 +111,19 @@ class Maria
         $valStart = "VALUES ";
         $valEnd   = "";
 
-        foreach ($nameColumns as $c)
+        foreach ($nameColumns as $name => $options)
         {
-            $col .= "$c, ";
+            $map[] = $name;
+
+            $col .= "$name, ";
         }
 
-        foreach ($data as $v)
+        foreach ($itemsList as $item)
         {
-            $vE = explode(" ", $v);
+//            $vE = explode(" ", $v);
 
-            $nameFirst = $vE[0];
-            $nameLast  = $vE[1];
+//            $nameFirst = $vE[0];
+//            $nameLast  = $vE[1];
 
             $val .= "('$nameFirst', '$nameLast'), ";
         }
@@ -113,15 +137,14 @@ class Maria
         $st .= ";";
 
 
-        $res = $this->dbn->query($st);
+//        $res = $this->dbn->query($st);
+//        if(!$res)
+//        {
+//            $error = $this->dbn->errorInfo();
+//        }
 
-        if(!$res)
-        {
-            $error = $this->dbn->errorInfo();
-        }
-
-//        $this->setOut(['debug' => ['$st' => $st]]);
+        $this->setOut(['debug' => ['$st' => $st]]);
 //        $this->setOut(['debug' => ['$error' => $error]]);
-        $this->setOut(['table' => ['insert' => $res]]);
+//        $this->setOut(['table' => ['insert' => $res]]);
     }
 }
