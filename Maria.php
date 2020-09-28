@@ -304,24 +304,66 @@ class Maria
         $this->stMany = $st;
     }
 
-    function getListIdOne($idlast)
+    function getListIdOne($idLast)
     {
         $r = [];
 
         for($i=0; $i < $this->countOne; $i++)
         {
-            array_push($r, $idlast);
-            $idlast--;
+            array_push($r, $idLast);
+            $idLast--;
         }
 
         return array_reverse($r);
     }
 
-    function getListIdMany($idlast)
+    function getListIdMany($idLast)
     {
+        $r = [];
 
+        $countItemsInMany = array_reverse($this->countItemsInMany);
 
-        return [];
+        foreach ($countItemsInMany as $index => $c)
+        {
+            $rin = [];
+
+            for($i=0; $i < $c; $i++)
+            {
+                array_push($rin, $idLast);
+                $idLast--;
+            }
+
+            $r[$index] = array_reverse($rin);
+        }
+
+        return array_reverse($r);
+    }
+
+    function prepareOneToManySt($idListOne, $idListMany)
+    {
+        $r = [];
+
+        foreach ($idListMany as $index1 => $itemOne)
+        {
+            $idOne = $idListOne[$index1];
+
+            foreach ($itemOne as $index2 => $itemOneChild)
+            {
+                $r[$itemOneChild] = $idOne;
+            }
+        }
+
+        $st = "INSERT INTO authors_books (id_book, id_author) VALUES ";
+
+        foreach ($r as $idMany => $idOne)
+        {
+            $st .= "($idMany, $idOne), ";
+        }
+
+        $st = substr(trim($st), 0, -1);
+        $st .= ';';
+
+        return $st;
     }
 
     function insertOneToMany($rowList)
@@ -350,6 +392,26 @@ class Maria
         $fetchOne  = $this->dbn->query("select count(id) as id_last from authors;")->fetch();
         $fetchMany = $this->dbn->query("select count(id) as id_last from books;")->fetch();
 
+
+
+
+
+
+        // get list id
+        $idLastOne  = intval($fetchOne['id_last']);
+        $idLastMany = intval($fetchMany['id_last']);
+
+        $idListOne  = $this->getListIdOne($idLastOne);
+        $idListMany = $this->getListIdMany($idLastMany);
+        // get list id
+
+
+        $stRef   = $this->prepareOneToManySt($idListOne, $idListMany);
+        $resRef  = $this->dbn->query($stRef);
+
+        $error = $resRef ? $error : $this->dbn->errorInfo();
+
+
         if($error)
         {
             $this->dbn->rollBack();
@@ -360,11 +422,7 @@ class Maria
         }
 
 
-        $idLastOne  = intval($fetchOne['id_last']);
-        $idLastMany = intval($fetchOne['id_last']);
 
-        $idListOne  = $this->getListIdOne($idLastOne);
-        $idListMany = $this->getListIdMany($idLastMany);
 
 
 
@@ -381,6 +439,8 @@ class Maria
                 'idlast'     => $idLastMany,
                 'idListMany' => $idListMany,
                 'countItemsInMany' => $this->countItemsInMany,
+                'keys' => array_keys($idListMany),
+                '$st' => $st,
             ]
         ]]);
 

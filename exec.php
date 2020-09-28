@@ -37,7 +37,7 @@ $maria = new Maria([
 ////    'authors'    => 'varchar(255) NOT NULL',
 //]);
 //
-//$maria->dropTable('author_books');
+//$maria->dropTable('authors_books');
 //$maria->createTable('authors_books', [
 ////    'id'        => 'int NOT NULL AUTO_INCREMENT',
 //    'id_author' => 'int NOT NULL',
@@ -45,7 +45,7 @@ $maria = new Maria([
 ////    'FOREIGN KEY' => '(id_book) REFERENCES books(id)',
 //]);
 //
-//$maria->dropTable('book_authors');
+//$maria->dropTable('books_authors');
 //$maria->createTable('books_authors', [
 ////    'id'        => 'int NOT NULL AUTO_INCREMENT',
 //    'id_book'   => 'int NOT NULL',
