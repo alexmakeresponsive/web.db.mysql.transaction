@@ -9,6 +9,12 @@ class Maria
     private $stOne  = "";
     private $stMany = "";
 
+    private $countItemsInMany = [];
+    private $countOne         = 0;
+
+
+
+
     function __construct($options)
     {
         $name = $options['name'];
@@ -30,16 +36,6 @@ class Maria
     {
         var_dump($this->out);
     }
-
-//    function exec($options)
-//    {
-//        $out = $this->out;
-//
-//               $action = $options['action'];
-//        $this->$action($options);
-//
-//        $this->out = $out;
-//    }
 
     function setOut($map)
     {
@@ -200,36 +196,9 @@ class Maria
 
     }
 
-    function insertOneToTable($rowItem, $index, $count)
+    function insertOneToTable($rowItem)
     {
         $this->insertOneToTablePrepare($rowItem);
-
-        if($index + 1 !== $count)
-        {
-            return;
-        }
-
-//        $res   = $this->dbn->query($this->stOne);
-//        $error = $res ? '': $this->dbn->errorInfo();
-//
-//        $id    = intval($this->dbn->lastInsertId());
-//
-//
-//        $idList = [];
-//
-//        for ($i = 0; $i < $count; $i++)
-//        {
-//            array_push($idList, $id);
-//            $id = $id + 1;
-//        }
-//
-//        $this->setOut(['debug' => ['insertOneToTable' => [
-//            'st'    => $this->stOne,
-//            'error' => $error,
-//            '$idList'    => $idList,
-//        ]]]);
-
-//        $this->stOne = '';
     }
 
     function insertOneToTablePrepare($rowItem)
@@ -275,36 +244,9 @@ class Maria
         $this->stOne = $st;
     }
 
-    function insertManyToTable($rowItem, $index, $count)
+    function insertManyToTable($rowItem)
     {
         $this->insertManyToTablePrepare($rowItem);
-
-        if($index + 1 !== $count)
-        {
-            return;
-        }
-
-//        $res   = $this->dbn->query($this->stMany);
-//        $error = $res ? '': $this->dbn->errorInfo();
-//
-//        $id    = intval($this->dbn->lastInsertId());
-//
-//
-//        $idList = [];
-//
-//        for ($i = 0; $i < $count; $i++)
-//        {
-//            array_push($idList, $id);
-//            $id = $id + 1;
-//        }
-//
-//        $this->setOut(['debug' => ['insertManyToTable' => [
-//            'st'    => $this->stMany,
-//            'error' => $error,
-//            '$idList'    => $idList,
-//        ]]]);
-
-//        $this->stMany = '';
     }
 
     function insertManyToTablePrepare($rowItem)
@@ -362,22 +304,83 @@ class Maria
         $this->stMany = $st;
     }
 
+    function getListIdOne($idlast)
+    {
+        $r = [];
+
+        for($i=0; $i < $this->countOne; $i++)
+        {
+            array_push($r, $idlast);
+            $idlast--;
+        }
+
+        return array_reverse($r);
+    }
+
+    function getListIdMany($idlast)
+    {
+
+
+        return [];
+    }
+
     function insertOneToMany($rowList)
     {
-        $count = count($rowList);
+            $this->countOne = count($rowList);
 
         foreach ($rowList as $index => $row)
         {
-            $this->insertOneToTable($row[0], $index, $count);
-            $this->insertManyToTable($row[1], $index, $count);
+            $this->insertOneToTable($row[0]);
+            $this->insertManyToTable($row[1]);
+
+            $this->countItemsInMany[$index] = count($row[1]['items']);
         }
+
+
+
+
+            $this->dbn->beginTransaction();
+
+        $resOne  = $this->dbn->query($this->stOne);
+        $resMany = $this->dbn->query($this->stMany);
+
+        $error = $resOne && $resMany ? false : $this->dbn->errorInfo();
+
+
+        $fetchOne  = $this->dbn->query("select count(id) as id_last from authors;")->fetch();
+        $fetchMany = $this->dbn->query("select count(id) as id_last from books;")->fetch();
+
+        if($error)
+        {
+            $this->dbn->rollBack();
+        }
+        else
+        {
+            $this->dbn->commit();
+        }
+
+
+        $idLastOne  = intval($fetchOne['id_last']);
+        $idLastMany = intval($fetchOne['id_last']);
+
+        $idListOne  = $this->getListIdOne($idLastOne);
+        $idListMany = $this->getListIdMany($idLastMany);
+
+
 
         $this->setOut(['debug' => [
             'insertOneToTable' => [
                 'st'    => $this->stOne,
+                'error' => $resOne ? '': $this->dbn->errorInfo(),
+                'idlast'    => $idLastOne,
+                'idListOne' => $idListOne,
             ],
             'insertManyToTable' => [
                 'st'    => $this->stMany,
+                'error' => $resMany ? '': $this->dbn->errorInfo(),
+                'idlast'     => $idLastMany,
+                'idListMany' => $idListMany,
+                'countItemsInMany' => $this->countItemsInMany,
             ]
         ]]);
 
