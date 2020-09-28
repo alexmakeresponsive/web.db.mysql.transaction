@@ -438,9 +438,6 @@ class Maria
                 'error' => $resMany ? '': $this->dbn->errorInfo(),
                 'idlast'     => $idLastMany,
                 'idListMany' => $idListMany,
-                'countItemsInMany' => $this->countItemsInMany,
-                'keys' => array_keys($idListMany),
-                '$st' => $st,
             ]
         ]]);
 
