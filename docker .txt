@@ -15,4 +15,4 @@ docker rm mysql.training
 docker exec -it mysql.training /bin/bash
 
 --mysql--
-mysql -uroot -ppass
+mysql -uroot -ppass -DtestDB

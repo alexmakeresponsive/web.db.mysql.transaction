@@ -6,6 +6,9 @@ class Maria
 
     private $out = [];
 
+    private $stOne  = "";
+    private $stMany = "";
+
     function __construct($options)
     {
         $name = $options['name'];
@@ -75,10 +78,16 @@ class Maria
         $st = "DROP TABLE $name;";
 
         $res = $this->dbn->query($st);
-        $this->setOut(['table' => ['drop' => [$name => $res]]]);
+
+        $error = $res ? '': $this->dbn->errorInfo();
+
+        $this->setOut(['table' => ['drop' => [
+            $name => $res,
+            'error' => $error,
+        ]]]);
     }
 
-    function insertRowsOneToMany($nameTable, $nameColumns, $itemsList)
+    function insertRowsNew($nameTable, $nameColumns, $itemsList)
     {
         // find book by name
         // if found - get id
@@ -87,15 +96,29 @@ class Maria
             // if found - get id
             // else insert author and get id
             // insert in book_authors each author id
+
+        // find author by name
+        // if found -get id
+        // else
+        //
+        // insert author and get id
+        // foreach book
+            // insert book in books table
+            // insert book and author id to authors_books
+
     }
 
-    function insertRowsOld($nameTable, $nameColumns, $itemsList)
+    function insertRowsOneTable($nameTable, $nameColumns, $itemsList)
     {
 
     // INSERT INTO table_name (column1, column2, column3, ...)
     // VALUES (value1, value2, value3, ...);
 
+        // INSERT INTO authors (name_first, name_last) VALUES ('Александр', 'Пушкин');
+
         $map = [];
+
+        $optionsColumn = [];
 
         $error = "";
 
@@ -104,19 +127,34 @@ class Maria
         $st .= "INSERT INTO $nameTable ";
 
         $col = '';
-        $val = '';
-
-        $colStart = "(";
-        $colEnd = ") ";
-        $valStart = "VALUES ";
-        $valEnd   = "";
+        $col .="(";
 
         foreach ($nameColumns as $name => $options)
         {
             $map[] = $name;
 
-            $col .= "$name, ";
+
+            switch ($options['type'])
+            {
+                case 'concat':
+                    foreach ($options['parts'] as $part)
+                    {
+                        $col .= "$part, ";
+                    }
+                    break;
+                default:
+
+                    break;
+            }
         }
+
+        $col = substr(trim($col), 0, -1);
+        $col .=") ";
+
+
+        $val = '';
+        $valStart = "VALUES ";
+        $valEnd   = "";
 
         foreach ($itemsList as $item)
         {
@@ -125,13 +163,20 @@ class Maria
 //            $nameFirst = $vE[0];
 //            $nameLast  = $vE[1];
 
-            $val .= "('$nameFirst', '$nameLast'), ";
+//            $val .= "('$nameFirst', '$nameLast'), ";
+
+            foreach ($item as $index => $value) {
+                $nameColumn = $map[$index];                // name, books
+                $optionsColumn = $nameColumns[$nameColumn];
+
+
+            }
         }
 
-        $col = substr(trim($col), 0, -1);
+
         $val = substr(trim($val), 0, -1);
 
-        $st .= $colStart . $col . $colEnd;
+        $st .= $col;
         $st .= $valStart . $val . $valEnd;
 
         $st .= ";";
@@ -143,8 +188,200 @@ class Maria
 //            $error = $this->dbn->errorInfo();
 //        }
 
-        $this->setOut(['debug' => ['$st' => $st]]);
+//        $this->setOut(['debug' => ['$st' => $st]]);
 //        $this->setOut(['debug' => ['$error' => $error]]);
 //        $this->setOut(['table' => ['insert' => $res]]);
+    }
+
+    function findRowByColumn($tableName, $columnName)
+    {
+        $out = $this->out;
+
+
+    }
+
+    function insertOneToTable($rowItem, $index, $count)
+    {
+        $this->insertOneToTablePrepare($rowItem);
+
+        if($index + 1 !== $count)
+        {
+            return;
+        }
+
+//        $res   = $this->dbn->query($this->stOne);
+//        $error = $res ? '': $this->dbn->errorInfo();
+//
+//        $id    = intval($this->dbn->lastInsertId());
+//
+//
+//        $idList = [];
+//
+//        for ($i = 0; $i < $count; $i++)
+//        {
+//            array_push($idList, $id);
+//            $id = $id + 1;
+//        }
+//
+//        $this->setOut(['debug' => ['insertOneToTable' => [
+//            'st'    => $this->stOne,
+//            'error' => $error,
+//            '$idList'    => $idList,
+//        ]]]);
+
+//        $this->stOne = '';
+    }
+
+    function insertOneToTablePrepare($rowItem)
+    {
+        $table = $rowItem['table'];
+
+        $st = empty($this->stOne) ? "INSERT INTO $table " : $this->stOne;
+
+        $col = '';
+        $col .="(";
+
+        $val = empty($this->stOne) ? "VALUES " : '';
+        $val .="(";
+
+        foreach ($rowItem['column'] as $column => $value)
+        {
+            if(empty($this->stOne))
+            {
+                $col .= "$column, ";
+            }
+            $val .= "'$value', ";
+        }
+
+        $col = substr(trim($col), 0, -1);
+        $val = substr(trim($val), 0, -1);
+
+
+        if(empty($this->stOne))
+        {
+            $col .=") ";
+        }
+            $val .="), ";
+
+        $st .= $col . $val;
+
+
+        if(!empty($this->stOne))
+        {
+            $st  = substr(trim($st), 0, -1);
+            $st .= ";";
+        }
+
+        $this->stOne = $st;
+    }
+
+    function insertManyToTable($rowItem, $index, $count)
+    {
+        $this->insertManyToTablePrepare($rowItem);
+
+        if($index + 1 !== $count)
+        {
+            return;
+        }
+
+//        $res   = $this->dbn->query($this->stMany);
+//        $error = $res ? '': $this->dbn->errorInfo();
+//
+//        $id    = intval($this->dbn->lastInsertId());
+//
+//
+//        $idList = [];
+//
+//        for ($i = 0; $i < $count; $i++)
+//        {
+//            array_push($idList, $id);
+//            $id = $id + 1;
+//        }
+//
+//        $this->setOut(['debug' => ['insertManyToTable' => [
+//            'st'    => $this->stMany,
+//            'error' => $error,
+//            '$idList'    => $idList,
+//        ]]]);
+
+//        $this->stMany = '';
+    }
+
+    function insertManyToTablePrepare($rowItem)
+    {
+        $table = $rowItem['table'];
+
+        $st = empty($this->stMany) ? "INSERT INTO $table " : $this->stMany;
+
+        // cols
+        $col  = '';
+        if(empty($this->stMany))
+        {
+            $col .="(";
+
+            foreach ($rowItem['column'] as $name)
+            {
+                $col .= "$name, ";
+            }
+
+            $col  = substr(trim($col), 0, -1);
+            $col .=") ";
+        }
+        // cols
+        // vals
+        $val = empty($this->stMany) ? "VALUES" : '';
+        $val .=" ";
+
+        foreach ($rowItem['items'] as $item)
+        {
+            $val .= "(";
+
+            foreach ($item as $value)
+            {
+                $val .= "'$value', ";
+            }
+
+            $val  = substr(trim($val), 0, -1);
+
+            $val .= "), ";
+        }
+
+        $val  = substr(trim($val), 0, -1);
+        $val .=", ";
+        // vals
+
+
+        $st .= $col . $val;
+
+        if(!empty($this->stMany))
+        {
+            $st  = substr(trim($st), 0, -1);
+            $st .= ";";
+        }
+
+        $this->stMany = $st;
+    }
+
+    function insertOneToMany($rowList)
+    {
+        $count = count($rowList);
+
+        foreach ($rowList as $index => $row)
+        {
+            $this->insertOneToTable($row[0], $index, $count);
+            $this->insertManyToTable($row[1], $index, $count);
+        }
+
+        $this->setOut(['debug' => [
+            'insertOneToTable' => [
+                'st'    => $this->stOne,
+            ],
+            'insertManyToTable' => [
+                'st'    => $this->stMany,
+            ]
+        ]]);
+
+        $this->stOne  = '';
+        $this->stMany = '';
     }
 }
