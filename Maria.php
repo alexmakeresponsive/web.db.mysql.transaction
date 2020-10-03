@@ -1,6 +1,6 @@
 <?php
 
-class Maria
+class Maria implements ForeignManager, InsertManager
 {
     private $dbn = null;
 
@@ -11,8 +11,6 @@ class Maria
 
     private $countItemsInMany = [];
     private $countOne         = 0;
-
-
 
 
     function __construct($options)
@@ -63,8 +61,6 @@ class Maria
 
         $st .= ");";
 
-//        $this->setOut(['debug' => ['$st' => $st]]);
-
         $res = $this->dbn->query($st);
         $this->setOut(['table' => ['create' => $res]]);
     }
@@ -81,119 +77,6 @@ class Maria
             $name => $res,
             'error' => $error,
         ]]]);
-    }
-
-    function insertRowsNew($nameTable, $nameColumns, $itemsList)
-    {
-        // find book by name
-        // if found - get id
-        // else insert book and get id
-        // for each author find him by name
-            // if found - get id
-            // else insert author and get id
-            // insert in book_authors each author id
-
-        // find author by name
-        // if found -get id
-        // else
-        //
-        // insert author and get id
-        // foreach book
-            // insert book in books table
-            // insert book and author id to authors_books
-
-    }
-
-    function insertRowsOneTable($nameTable, $nameColumns, $itemsList)
-    {
-
-    // INSERT INTO table_name (column1, column2, column3, ...)
-    // VALUES (value1, value2, value3, ...);
-
-        // INSERT INTO authors (name_first, name_last) VALUES ('Александр', 'Пушкин');
-
-        $map = [];
-
-        $optionsColumn = [];
-
-        $error = "";
-
-        $st = "";
-
-        $st .= "INSERT INTO $nameTable ";
-
-        $col = '';
-        $col .="(";
-
-        foreach ($nameColumns as $name => $options)
-        {
-            $map[] = $name;
-
-
-            switch ($options['type'])
-            {
-                case 'concat':
-                    foreach ($options['parts'] as $part)
-                    {
-                        $col .= "$part, ";
-                    }
-                    break;
-                default:
-
-                    break;
-            }
-        }
-
-        $col = substr(trim($col), 0, -1);
-        $col .=") ";
-
-
-        $val = '';
-        $valStart = "VALUES ";
-        $valEnd   = "";
-
-        foreach ($itemsList as $item)
-        {
-//            $vE = explode(" ", $v);
-
-//            $nameFirst = $vE[0];
-//            $nameLast  = $vE[1];
-
-//            $val .= "('$nameFirst', '$nameLast'), ";
-
-            foreach ($item as $index => $value) {
-                $nameColumn = $map[$index];                // name, books
-                $optionsColumn = $nameColumns[$nameColumn];
-
-
-            }
-        }
-
-
-        $val = substr(trim($val), 0, -1);
-
-        $st .= $col;
-        $st .= $valStart . $val . $valEnd;
-
-        $st .= ";";
-
-
-//        $res = $this->dbn->query($st);
-//        if(!$res)
-//        {
-//            $error = $this->dbn->errorInfo();
-//        }
-
-//        $this->setOut(['debug' => ['$st' => $st]]);
-//        $this->setOut(['debug' => ['$error' => $error]]);
-//        $this->setOut(['table' => ['insert' => $res]]);
-    }
-
-    function findRowByColumn($tableName, $columnName)
-    {
-        $out = $this->out;
-
-
     }
 
     function insertOneToTable($rowItem)

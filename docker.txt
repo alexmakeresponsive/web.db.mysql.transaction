@@ -16,3 +16,4 @@ docker exec -it mysql.training /bin/bash
 
 --mysql--
 mysql -uroot -ppass -DtestDB
+mysql -uroot -ppass -DtestForeignKeys
