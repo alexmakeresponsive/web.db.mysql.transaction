@@ -41,13 +41,19 @@ class Maria
     function createDB($name)
     {
         $res = $this->dbn->query("CREATE DATABASE $name");
-        $this->setOut(['db' => ['create' => $res]]);
+
+        $resResolve = $res ? $res: $this->dbn->errorInfo();
+
+        $this->setOut(['db' => ['create' => $resResolve]]);
     }
 
     function dropDB($name)
     {
         $res = $this->dbn->query("DROP DATABASE $name");
-        $this->setOut(['db' => ['drop' => $res]]);
+
+        $resResolve = $res ? $res: $this->dbn->errorInfo();
+
+        $this->setOut(['db' => ['drop' => $resResolve]]);
     }
 
     function useDb($name)

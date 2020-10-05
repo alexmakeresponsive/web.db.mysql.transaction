@@ -1,17 +1,15 @@
 <?php
 
-system('clear');
+/**
+ * @var $connect
+ * @var $nameDb
+ */
 
-require '../../Maria.php';
+require $_SERVER['PWD'] .'/Relations/connect.php';
 
-$maria = new Maria([
-    'name'     => 'testForeignKeys',
-    'dsn'      => 'mysql:dbname=testForeignKeys;host=0.0.0.0',
-    'user'     => 'root',
-    'password' => 'pass'
-]);
+$connect->useDb($nameDb);
 
-$maria->insertOneToMany(
+$connect->insertOneToMany(
     [
         [
              [
@@ -68,7 +66,7 @@ $maria->insertOneToMany(
     ]
 );
 
-//$maria->insertRows('books',
+//$connect->insertRows('books',
 //    [
 //        'title'   => [
 //            'multiple' => 'n'

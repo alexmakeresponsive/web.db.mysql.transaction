@@ -1,18 +1,13 @@
 <?php
 
-system('clear');
+/**
+ * @var $connect
+ * @var $nameDb
+ */
 
-require '../../Maria.php';
+require $_SERVER['PWD'] .'/Relations/connect.php';
 
-$maria = new Maria([
-    'name'     => '',
-    'dsn'      => 'mysql:dbname=;host=0.0.0.0',
-    'user'     => 'root',
-    'password' => 'pass'
-]);
+$connect->useDb($nameDb);
 
-$maria->dropTable('authors');
-$maria->dropTable('books');
-$maria->dropTable('authors_books');
-$maria->dropTable('books_authors');
-
+$connect->dropTable('authors');
+$connect->dropTable('books');

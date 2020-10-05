@@ -10,5 +10,5 @@ $port   = $pars['port'];
 $user   = $pars['user'];
 $pass   = $pars['pass'];
 
-$nameDb = !empty($opts['db']) ? $opts['db']: 'rlts';
+$nameDb = !empty($opts['db']) ? $opts['db']: 'frgn';
 $nameTb = $opts['tb'];
