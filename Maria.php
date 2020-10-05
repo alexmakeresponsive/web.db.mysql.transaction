@@ -1,6 +1,6 @@
 <?php
 
-class Maria implements ForeignManager, InsertManager
+class Maria
 {
     private $dbn = null;
 
@@ -15,11 +15,9 @@ class Maria implements ForeignManager, InsertManager
 
     function __construct($options)
     {
-        $name = $options['name'];
         try
         {
             $this->dbn = new PDO($options['dsn'], $options['user'], $options['password']);
-            $this->dbn->query("USE $name;");
 
             $this->setOut(['connect' => "Connect success"]);
         }
@@ -42,8 +40,23 @@ class Maria implements ForeignManager, InsertManager
 
     function createDB($name)
     {
-        $create = $this->dbn->query("CREATE DATABASE $name");
-        $this->setOut(['db' => ['create' => $create]]);
+        $res = $this->dbn->query("CREATE DATABASE $name");
+        $this->setOut(['db' => ['create' => $res]]);
+    }
+
+    function dropDB($name)
+    {
+        $res = $this->dbn->query("DROP DATABASE $name");
+        $this->setOut(['db' => ['drop' => $res]]);
+    }
+
+    function useDb($name)
+    {
+        $res = $this->dbn->query("USE $name");
+
+        $resResolve = $res ? $res: $this->dbn->errorInfo();
+
+        $this->setOut(['db' => ['use' => $resResolve]]);
     }
 
     function createTable($name, $options)
