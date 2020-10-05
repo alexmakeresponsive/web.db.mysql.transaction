@@ -16,6 +16,6 @@ $connect->alterTable('orders', [
 
 $connect->alterTable('orders', [
     'ADD FOREIGN KEY' => '(user_id) REFERENCES users(id) 
-                            ON DELETE RESTRICT
+                            ON DELETE CASCADE
                             ON UPDATE CASCADE',
 ]);
