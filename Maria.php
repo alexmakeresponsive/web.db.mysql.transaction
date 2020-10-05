@@ -96,6 +96,39 @@ class Maria
         $this->setOut(['table' => ['create' => $listMerge]]);
     }
 
+    function alterTable($name, $options)
+    {
+        $st = "";
+
+        $st .= "ALTER TABLE $name ";
+
+        $kL = '';
+
+        foreach ($options as $k => $v)
+        {
+            $kL  = $k;
+            $st .= "$k $v";
+        }
+
+        $st .= ';';
+
+        $res = $this->dbn->query($st);
+
+        $resResolve = $res ? $res: $this->dbn->errorInfo();
+
+        $listCurr = [
+            $kL => $resResolve
+        ];
+
+        $out = $this->out;
+
+        $listPrev = isset($out['table']) ? $out['table']['alter'] : [];
+        $listMerge = array_merge($listCurr, $listPrev);
+
+        $this->setOut(['table' => ['alter' => $listMerge]]);
+        $this->setOut(['st' => $st]);
+    }
+
     function dropTable($name)
     {
         $st = "DROP TABLE $name;";
