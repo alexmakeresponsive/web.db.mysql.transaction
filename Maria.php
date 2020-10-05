@@ -81,7 +81,19 @@ class Maria
         $st .= ");";
 
         $res = $this->dbn->query($st);
-        $this->setOut(['table' => ['create' => $res]]);
+
+        $resResolve = $res ? $res: $this->dbn->errorInfo();
+
+        $listCurr = [
+            $name => $resResolve
+        ];
+
+        $out = $this->out;
+
+        $listPrev = isset($out['table']) ? $out['table']['create'] : [];
+        $listMerge = array_merge($listCurr, $listPrev);
+
+        $this->setOut(['table' => ['create' => $listMerge]]);
     }
 
     function dropTable($name)

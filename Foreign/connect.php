@@ -7,7 +7,7 @@
  * @var $name
  */
 
-require $_SERVER['PWD'] .'/Relations/config.php';
+require $_SERVER['PWD'] .'/Foreign/config.php';
 require $_SERVER['PWD'] .'/Maria.php';
 
 $optionsConnect = [

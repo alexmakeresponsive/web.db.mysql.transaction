@@ -5,9 +5,9 @@
  * @var $nameDb
  */
 
-require $_SERVER['PWD'] .'/Relations/connect.php';
+require $_SERVER['PWD'] .'/Foreign/connect.php';
 
 $connect->useDb($nameDb);
 
-$connect->dropTable('authors');
-$connect->dropTable('books');
+$connect->dropTable('orders');
+$connect->dropTable('users');

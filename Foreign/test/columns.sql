@@ -1,0 +1,2 @@
+SHOW COLUMNS FROM users;
+SHOW COLUMNS FROM orders;
